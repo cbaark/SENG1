@@ -2,10 +2,7 @@ import random
 import time
 import customtkinter as ctk
 
-# TODO: input validation/error handling for invalid inputs
-# help/insturctions page on welcome page
-# keyboard bindings (esc for quit etc..)
-# improve current error messages
+# TODO:
 # confirmation dialog for quitting
 # progress bar for fixed mode
 # custom icons for modes
@@ -25,7 +22,7 @@ class ArithmeticQuizApp(ctk.CTk):
     def __init__(self):
         super().__init__()  # initialise the parent CTk class
         self.title("Arithmetic Quiz")
-        self.geometry("400x400")
+        self.geometry("500x500")
 
         # dark mode, dark blue theme for the app 
         ctk.set_appearance_mode("dark")
@@ -40,6 +37,11 @@ class ArithmeticQuizApp(ctk.CTk):
         self.streak_length = 0
         self.questions_attempted = 0
         self.current_streak = 0
+
+        # keyboard bindings
+        self.bind('<Escape>', lambda e: self.show_quit_dialog())
+        self.bind('<Return>', lambda e: self.handle_return_key())
+        self.bind('<KP_Enter>', lambda e: self.handle_return_key()) 
 
         # starting with welcome page
         self.show_welcome_page()
@@ -59,6 +61,63 @@ class ArithmeticQuizApp(ctk.CTk):
             text='Start Quiz',
             command=self.show_difficulty_selection
         ).pack(pady=20)
+
+        # Add help button
+        help_button = ctk.CTkButton(
+            self,
+            text="Help & Instructions",
+            command=self.show_help_page
+        )
+        help_button.pack(pady=10)
+
+    def show_help_page(self):
+        """Show help and instructions page"""
+        for widget in self.winfo_children():
+            widget.destroy()
+            
+        # Title
+        help_label = ctk.CTkLabel(
+            self,
+            text="Help & Instructions",
+            font=("Arial", 24, "bold")
+        )
+        help_label.pack(pady=20)
+        
+        # Instructions text
+        instructions = """
+        Game Modes:
+        • Timed Mode: Answer as many questions as you can within the time limit
+        • Fixed Mode: Answer a set number of questions
+        • Streak Mode: Try to get a streak of correct answers
+        
+        Difficulty Levels:
+        • Easy: Addition and subtraction (1-10)
+        • Medium: Add multiplication (1-15)
+        • Hard: Add division (1-20)
+        • Custom: Create your own settings
+        
+        Keyboard Shortcuts:
+        • Enter/Return: Submit answer
+        • Escape: Quit quiz
+        • Numpad: Supported for number entry
+        
+        Tips:
+        • Use keyboard for faster input
+        • Watch your time in timed mode
+        • Practice with easy mode first
+        """
+        
+        text_box = ctk.CTkTextbox(self, width=350, height=400)
+        text_box.pack(pady=10)
+        text_box.insert("1.0", instructions)
+        text_box.configure(state="disabled")
+        
+        back_button = ctk.CTkButton(
+            self,
+            text="Back to Menu",
+            command=self.show_welcome_page
+        )
+        back_button.pack(pady=20)
 
     def show_mode_selection(self): 
         for widget in self.winfo_children():
@@ -89,6 +148,14 @@ class ArithmeticQuizApp(ctk.CTk):
             text='Streak Mode',
             command=lambda: self.set_game_mode("streak")
         ).pack(pady=10)
+
+        # Add back button
+        back_button = ctk.CTkButton(
+            self,
+            text="Menu",
+            command=self.show_welcome_page
+        )
+        back_button.pack(pady=10)
 
     def set_game_mode(self, mode):
         self.game_mode = mode
@@ -155,6 +222,14 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         custom_button.pack(pady=10)
 
+        # Add back button
+        back_button = ctk.CTkButton(
+            self,
+            text="Menu",
+            command=self.show_welcome_page if self.game_mode is None else self.show_mode_selection
+        )
+        back_button.pack(pady=10)
+
     def set_difficulty(self, difficulty):
         self.difficulty = difficulty
         if self.game_mode == "timed":
@@ -217,6 +292,14 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         submit_button.pack(pady=20)
 
+        # Add back button below submit button
+        back_button = ctk.CTkButton(
+            self,
+            text="Menu",
+            command=self.show_difficulty_selection
+        )
+        back_button.pack(pady=10)
+
     def show_time_selection(self):
         for widget in self.winfo_children():
             widget.destroy()
@@ -237,6 +320,14 @@ class ArithmeticQuizApp(ctk.CTk):
             command=self.process_time_selection
         )
         submit_button.pack(pady=20)
+
+        # Add back button
+        back_button = ctk.CTkButton(
+            self,
+            text="Menu",
+            command=self.show_mode_selection
+        )
+        back_button.pack(pady=10)
 
     def show_question_amount(self):
         for widget in self.winfo_children():
@@ -259,6 +350,14 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         submit_button.pack(pady=20)
 
+        # Add back button
+        back_button = ctk.CTkButton(
+            self,
+            text="Menu",
+            command=self.show_mode_selection
+        )
+        back_button.pack(pady=10)
+
     def show_streak_selection(self):
         for widget in self.winfo_children():
             widget.destroy()
@@ -280,18 +379,32 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         submit_button.pack(pady=20)
 
+        # back 2 menu
+        back_button = ctk.CTkButton(
+            self,
+            text="Menu",
+            command=self.show_mode_selection
+        )
+        back_button.pack(pady=10)
+
     def process_custom_difficulty(self):
         selected_operators = [op for op, var in self.operator_vars.items() if var.get()]
         if not selected_operators:
-            return  
+            self.show_error_message("Please select at least one operator")
+            return
             
         try:
             min_val = int(self.min_entry.get() or 1)
             max_val = int(self.max_entry.get() or 20)
             if min_val >= max_val:
-                return  
+                self.show_error_message("Maximum value must be greater than minimum value")
+                return
+            if min_val < 0:
+                self.show_error_message("Numbers must be positive")
+                return
         except ValueError:
-            return  
+            self.show_error_message("Please enter valid numbers for the range")
+            return
 
         self.set_difficulty({
             "name": "Custom",
@@ -301,30 +414,46 @@ class ArithmeticQuizApp(ctk.CTk):
 
     def process_time_selection(self):
         try:
-            self.time_limit = int(self.time_entry.get() or 60)
-            if self.time_limit <= 0:
-                return  
+            time_limit = int(self.time_entry.get() or 60)
+            if time_limit <= 0:
+                self.show_error_message("Please enter a positive number of seconds")
+                return
+            if time_limit > 3600:  # 1 hour max
+                self.show_error_message("Time limit cannot exceed 1 hour (3600 seconds)")
+                return
+            self.time_limit = time_limit
             self.start_quiz()
         except ValueError:
-            return  
+            self.show_error_message("Please enter a valid number")
 
     def process_question_amount(self):
         try:
-            self.question_amount = int(self.amount_entry.get() or 10)
-            if self.question_amount <= 0:
-                return  
+            amount = int(self.amount_entry.get() or 10)
+            if amount <= 0:
+                self.show_error_message("Please enter a positive number of questions")
+                return
+            if amount > 100:  # Reasonable maximum
+                self.show_error_message("Maximum 100 questions allowed")
+                return
+            self.question_amount = amount
             self.start_quiz()
         except ValueError:
-            return  
+            self.show_error_message("Please enter a valid number")
 
     def process_streak_selection(self):
         try:
-            self.streak_length = int(self.streak_entry.get() or 5)
-            if self.streak_length <= 0:
-                return  
+            streak = int(self.streak_entry.get() or 5)
+            if streak <= 0:
+                self.show_error_message("Please enter a positive streak goal")
+                return
+            if streak > 50:  # Reasonable maximum
+                self.show_error_message("Maximum streak goal is 50")
+                return
+            self.streak_length = streak
             self.start_quiz()
         except ValueError:
-            return  
+            self.show_error_message("Please enter a valid number")
+
     def start_quiz(self):
         self.score = 0
         self.questions_attempted = 0
@@ -445,13 +574,13 @@ class ArithmeticQuizApp(ctk.CTk):
                 self.current_streak += 1
             else:
                 self.current_streak = 0
+                self.show_error_message(f"Incorrect! The correct answer was {self.question['answer']}")
 
             self.show_result(correct)
             
         except ValueError:
-            # error handling for non int
+            self.show_error_message("Please enter a valid number")
             self.answer_entry.delete(0, 'end')
-            return
 
     def show_result(self, correct):
         # clear answer_entry
@@ -559,6 +688,58 @@ class ArithmeticQuizApp(ctk.CTk):
             command=self.show_welcome_page
         )
         main_menu_button.pack(side='left', padx=10)
+
+    def show_quit_dialog(self):
+        """Show confirmation dialog when quitting"""
+        quit_window = ctk.CTkToplevel(self)
+        quit_window.title("Quit?")
+        quit_window.geometry("300x150")
+        
+        label = ctk.CTkLabel(
+            quit_window,
+            text="Are you sure you want to quit?",
+            font=("Arial", 16)
+        )
+        label.pack(pady=20)
+        
+        button_frame = ctk.CTkFrame(quit_window)
+        button_frame.pack(pady=10)
+        
+        ctk.CTkButton(
+            button_frame,
+            text="Yes",
+            command=self.quit
+        ).pack(side='left', padx=10)
+        
+        ctk.CTkButton(
+            button_frame,
+            text="No",
+            command=quit_window.destroy
+        ).pack(side='left', padx=10)
+
+    def handle_return_key(self):
+        """Handle Return key press based on current screen"""
+        if hasattr(self, 'answer_entry') and self.answer_entry.winfo_viewable():
+            self.check_answer()
+
+    def show_error_message(self, message):
+        """Show error message in a popup"""
+        error_window = ctk.CTkToplevel(self)
+        error_window.title("Error")
+        error_window.geometry("400x150")
+        
+        label = ctk.CTkLabel(
+            error_window,
+            text=message,
+            font=("Arial", 16)
+        )
+        label.pack(pady=20)
+        
+        ctk.CTkButton(
+            error_window,
+            text="OK",
+            command=error_window.destroy
+        ).pack(pady=10)
 
 # start the app
 if __name__ == "__main__":
