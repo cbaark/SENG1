@@ -2,10 +2,28 @@ import random
 import time
 import customtkinter as ctk
 
+# TODO: input validation/error handling for invalid inputs
+# help/insturctions page on welcome page
+# keyboard bindings (esc for quit etc..)
+# improve current error messages
+# confirmation dialog for quitting
+# progress bar for fixed mode
+# custom icons for modes
+# color code correct/incorrect answers
+# practice mode/infinite mode where users can practice without any conditions
+# support for numpad
+# optimise question generation how though???
+# sound effects for correct/incorrect answers???
+# tooltips for what easy, medium, hard mode means and text underneath telling users to hover over the buttons to see what it means???
+# perfect score celebration screen???
+# light mode option?? high contrast option??
+# settings page for customisation of stuff said above
+
+# VENI VIDI VICI
 
 class ArithmeticQuizApp(ctk.CTk):
     def __init__(self):
-        super().__init__()  # Initialize the parent CTk class
+        super().__init__()  # initialise the parent CTk class
         self.title("Arithmetic Quiz")
         self.geometry("400x400")
 
@@ -39,7 +57,7 @@ class ArithmeticQuizApp(ctk.CTk):
         start_button = ctk.CTkButton(
             self,
             text='Start Quiz',
-            command=self.show_mode_selection
+            command=self.show_difficulty_selection
         ).pack(pady=20)
 
     def show_mode_selection(self): 
@@ -74,7 +92,15 @@ class ArithmeticQuizApp(ctk.CTk):
 
     def set_game_mode(self, mode):
         self.game_mode = mode
-        self.show_difficulty_selection()
+        if self.difficulty: 
+            if mode == "timed":
+                self.show_time_selection()
+            elif mode == "fixed":
+                self.show_question_amount()
+            else:
+                self.show_streak_selection()
+        else:
+            self.show_difficulty_selection()
 
     def show_difficulty_selection(self):
         for widget in self.winfo_children():
@@ -135,14 +161,16 @@ class ArithmeticQuizApp(ctk.CTk):
             self.show_time_selection()
         elif self.game_mode == "fixed":
             self.show_question_amount()
-        else:
+        elif self.game_mode == "streak":
             self.show_streak_selection()
-        
+        else:
+            self.show_mode_selection()
+
     def show_custom_difficulty(self):
         for widget in self.winfo_children():
             widget.destroy()
 
-        # Title
+        # title label
         custom_label = ctk.CTkLabel(
             self,
             text="Customize Difficulty",
@@ -150,7 +178,7 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         custom_label.pack(pady=20)
 
-        # Operator selection
+        # select operator
         operator_frame = ctk.CTkFrame(self)
         operator_frame.pack(pady=10)
         
@@ -169,7 +197,7 @@ class ArithmeticQuizApp(ctk.CTk):
             )
             checkbox.pack(side='left', padx=5)
 
-        # Number range
+        # number range
         range_frame = ctk.CTkFrame(self)
         range_frame.pack(pady=10)
 
@@ -181,7 +209,7 @@ class ArithmeticQuizApp(ctk.CTk):
         self.max_entry = ctk.CTkEntry(range_frame, placeholder_text="Max (20)")
         self.max_entry.pack(side='left', padx=5)
 
-        # Submit button
+        # submission button
         submit_button = ctk.CTkButton(
             self,
             text="Continue",
@@ -308,7 +336,7 @@ class ArithmeticQuizApp(ctk.CTk):
         for widget in self.winfo_children():
             widget.destroy()
 
-        # Status frame (top)
+        # top frame
         status_frame = ctk.CTkFrame(self)
         status_frame.pack(fill='x', padx=20, pady=10)
 
@@ -326,7 +354,7 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         self.score_label.pack(side='right', padx=10)
 
-        # Question frame (middle)
+        # middle frame
         question_frame = ctk.CTkFrame(self)
         question_frame.pack(pady=20)
 
@@ -340,7 +368,7 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         self.question_label.pack(pady=20)
 
-        # Answer frame (bottom)
+        # bottom frame
         answer_frame = ctk.CTkFrame(self)
         answer_frame.pack(pady=20)
 
@@ -359,10 +387,9 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         submit_button.pack(pady=10)
 
-        # Focus on answer entry
         self.answer_entry.focus()
 
-        # Start timer update if in timed mode
+        # timer update for timed mode
         if self.game_mode == "timed":
             self.update_timer()
 
@@ -374,7 +401,7 @@ class ArithmeticQuizApp(ctk.CTk):
         
         if self.difficulty["name"] == "Easy":
             if operator == "-":
-                # For subtraction in easy mode, ensure num1 >= num2 to avoid negative results
+                # avoid negative answers for easy mode
                 num2 = random.randint(num_range[0], num_range[1])
                 num1 = random.randint(num2, num_range[1])
             else:
@@ -382,7 +409,7 @@ class ArithmeticQuizApp(ctk.CTk):
                 num2 = random.randint(num_range[0], num_range[1])
 
         if operator == "/":
-            # Ensure division results in whole numbers
+            # whole numbers only for division
             num2 = random.randint(1, num_range[1])
             multiplier = random.randint(1, num_range[1] // num2)
             num1 = num2 * multiplier
@@ -422,22 +449,22 @@ class ArithmeticQuizApp(ctk.CTk):
             self.show_result(correct)
             
         except ValueError:
-            # Show error for invalid input
+            # error handling for non int
             self.answer_entry.delete(0, 'end')
             return
 
     def show_result(self, correct):
-        # Clear the answer entry
+        # clear answer_entry
         self.answer_entry.delete(0, 'end')
         
-        # Update score label
+        # update score
         self.score_label.configure(text=f"Score: {self.score}/{self.questions_attempted}")
         
-        # Check if quiz should end
+        # quiz end check
         if self.should_end_quiz():
             self.show_end_screen()
         else:
-            # Generate and show next question
+            # make and show next question
             self.question = self.generate_question()
             self.question_label.configure(
                 text=f"{self.question['num1']} {self.question['operator']} {self.question['num2']} = ?"
@@ -470,7 +497,7 @@ class ArithmeticQuizApp(ctk.CTk):
         for widget in self.winfo_children():
             widget.destroy()
 
-        # End screen title
+        # end screen
         title_label = ctk.CTkLabel(
             self,
             text="Quiz Complete!",
@@ -478,7 +505,7 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         title_label.pack(pady=20)
 
-        # Final score
+        # final score
         score_label = ctk.CTkLabel(
             self,
             text=f"Final Score: {self.score}/{self.questions_attempted}",
@@ -486,7 +513,7 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         score_label.pack(pady=10)
 
-        # Additional stats based on game mode
+        # extra stats based on game mode
         if self.game_mode == "timed":
             time_taken = int(time.time() - self.start_time)
             stats_label = ctk.CTkLabel(
@@ -503,7 +530,7 @@ class ArithmeticQuizApp(ctk.CTk):
             )
             stats_label.pack(pady=10)
 
-        # Accuracy percentage
+        # accuracy percentage
         if self.questions_attempted > 0:
             accuracy = (self.score / self.questions_attempted) * 100
             accuracy_label = ctk.CTkLabel(
@@ -513,19 +540,19 @@ class ArithmeticQuizApp(ctk.CTk):
             )
             accuracy_label.pack(pady=10)
 
-        # Buttons frame
+        # button frame
         buttons_frame = ctk.CTkFrame(self)
         buttons_frame.pack(pady=20)
 
-        # Play again button
+        # play again button
         play_again_button = ctk.CTkButton(
             buttons_frame,
             text="Play Again",
-            command=self.show_mode_selection
+            command=self.show_difficulty_selection
         )
         play_again_button.pack(side='left', padx=10)
 
-        # Main menu button
+        # main menu button
         main_menu_button = ctk.CTkButton(
             buttons_frame,
             text="Main Menu",
@@ -533,6 +560,7 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         main_menu_button.pack(side='left', padx=10)
 
+# start the app
 if __name__ == "__main__":
     app = ArithmeticQuizApp()
     app.mainloop()
