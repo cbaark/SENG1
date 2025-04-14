@@ -37,6 +37,11 @@ class ArithmeticQuizApp(ctk.CTk):
         self.streak_length = 0
         self.questions_attempted = 0
         self.current_streak = 0
+        self.nav_history = []
+
+        # tracker
+        self.error_window = None
+        self.timer_id = None  # Add timer ID tracker
 
         # keyboard bindings
         self.bind('<Escape>', lambda e: self.show_quit_dialog())
@@ -46,7 +51,39 @@ class ArithmeticQuizApp(ctk.CTk):
         # starting with welcome page
         self.show_welcome_page()
 
+    # HISTORY NAVIGATION
+
+    def push_to_history(self, current_page):
+        """Add current page to navigation history"""
+        self.nav_history.append(current_page)
+
+    def go_back(self):
+        """Navigate to previous page"""
+        if len(self.nav_history) > 1:
+            self.nav_history.pop()  # remove page
+            previous_page = self.nav_history[-1]  # call prev page
+            self.nav_history.pop()  # remove prev page to be called again
+        
+        # call page
+        if previous_page == "welcome":
+            self.show_welcome_page()
+        elif previous_page == "mode":
+            self.show_mode_selection()
+        elif previous_page == "difficulty":
+            self.show_difficulty_selection()
+        elif previous_page == "custom":
+            self.show_custom_difficulty()
+        elif previous_page == "time":
+            self.show_time_selection()
+        elif previous_page == "questions":
+            self.show_question_amount()
+        elif previous_page == "streak":
+            self.show_streak_selection()
+
     def show_welcome_page(self):
+        # cancel timer when returning to menu
+        self.cancel_timer()
+        self.push_to_history("welcome")
         for widget in self.winfo_children():  # clean slate
             widget.destroy()
         
@@ -62,7 +99,7 @@ class ArithmeticQuizApp(ctk.CTk):
             command=self.show_difficulty_selection
         ).pack(pady=20)
 
-        # Add help button
+        # add help button
         help_button = ctk.CTkButton(
             self,
             text="Help & Instructions",
@@ -72,10 +109,11 @@ class ArithmeticQuizApp(ctk.CTk):
 
     def show_help_page(self):
         """Show help and instructions page"""
+        self.geometry('600x700')
         for widget in self.winfo_children():
             widget.destroy()
             
-        # Title
+        # title
         help_label = ctk.CTkLabel(
             self,
             text="Help & Instructions",
@@ -83,7 +121,7 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         help_label.pack(pady=20)
         
-        # Instructions text
+        # instructions text
         instructions = """
         Game Modes:
         • Timed Mode: Answer as many questions as you can within the time limit
@@ -107,7 +145,7 @@ class ArithmeticQuizApp(ctk.CTk):
         • Practice with easy mode first
         """
         
-        text_box = ctk.CTkTextbox(self, width=350, height=400)
+        text_box = ctk.CTkTextbox(self, width=500, height=400)
         text_box.pack(pady=10)
         text_box.insert("1.0", instructions)
         text_box.configure(state="disabled")
@@ -120,6 +158,7 @@ class ArithmeticQuizApp(ctk.CTk):
         back_button.pack(pady=20)
 
     def show_mode_selection(self): 
+        self.push_to_history("mode")
         for widget in self.winfo_children():
             widget.destroy()
 
@@ -152,8 +191,8 @@ class ArithmeticQuizApp(ctk.CTk):
         # Add back button
         back_button = ctk.CTkButton(
             self,
-            text="Menu",
-            command=self.show_welcome_page
+            text="Back",
+            command=self.go_back
         )
         back_button.pack(pady=10)
 
@@ -170,6 +209,7 @@ class ArithmeticQuizApp(ctk.CTk):
             self.show_difficulty_selection()
 
     def show_difficulty_selection(self):
+        self.push_to_history("difficulty")
         for widget in self.winfo_children():
             widget.destroy()
 
@@ -225,8 +265,8 @@ class ArithmeticQuizApp(ctk.CTk):
         # Add back button
         back_button = ctk.CTkButton(
             self,
-            text="Menu",
-            command=self.show_welcome_page if self.game_mode is None else self.show_mode_selection
+            text="Back",
+            command=self.go_back
         )
         back_button.pack(pady=10)
 
@@ -242,6 +282,7 @@ class ArithmeticQuizApp(ctk.CTk):
             self.show_mode_selection()
 
     def show_custom_difficulty(self):
+        self.push_to_history("custom")
         for widget in self.winfo_children():
             widget.destroy()
 
@@ -295,12 +336,13 @@ class ArithmeticQuizApp(ctk.CTk):
         # Add back button below submit button
         back_button = ctk.CTkButton(
             self,
-            text="Menu",
-            command=self.show_difficulty_selection
+            text="Back",
+            command=self.go_back
         )
         back_button.pack(pady=10)
 
     def show_time_selection(self):
+        self.push_to_history("time")
         for widget in self.winfo_children():
             widget.destroy()
 
@@ -324,12 +366,13 @@ class ArithmeticQuizApp(ctk.CTk):
         # Add back button
         back_button = ctk.CTkButton(
             self,
-            text="Menu",
-            command=self.show_mode_selection
+            text="Back",
+            command=self.go_back
         )
         back_button.pack(pady=10)
 
     def show_question_amount(self):
+        self.push_to_history("questions")
         for widget in self.winfo_children():
             widget.destroy()
 
@@ -353,12 +396,13 @@ class ArithmeticQuizApp(ctk.CTk):
         # Add back button
         back_button = ctk.CTkButton(
             self,
-            text="Menu",
-            command=self.show_mode_selection
+            text="Back",
+            command=self.go_back
         )
         back_button.pack(pady=10)
 
     def show_streak_selection(self):
+        self.push_to_history("streak")
         for widget in self.winfo_children():
             widget.destroy()
 
@@ -382,8 +426,8 @@ class ArithmeticQuizApp(ctk.CTk):
         # back 2 menu
         back_button = ctk.CTkButton(
             self,
-            text="Menu",
-            command=self.show_mode_selection
+            text="Back",
+            command=self.go_back
         )
         back_button.pack(pady=10)
 
@@ -462,6 +506,8 @@ class ArithmeticQuizApp(ctk.CTk):
         self.show_quiz_interface()
 
     def show_quiz_interface(self):
+        # Cancel any existing timer first
+        self.cancel_timer()
         for widget in self.winfo_children():
             widget.destroy()
 
@@ -507,7 +553,6 @@ class ArithmeticQuizApp(ctk.CTk):
             width=200
         )
         self.answer_entry.pack(pady=10)
-        self.answer_entry.bind('<Return>', lambda e: self.check_answer())
 
         submit_button = ctk.CTkButton(
             answer_frame,
@@ -515,6 +560,15 @@ class ArithmeticQuizApp(ctk.CTk):
             command=self.check_answer
         )
         submit_button.pack(pady=10)
+
+        # result label 
+        self.result_label = ctk.CTkLabel(
+            answer_frame,
+            text="",
+            font=("Arial", 16),
+            text_color="white" # default color
+        )
+        self.result_label.pack(pady=10)
 
         self.answer_entry.focus()
 
@@ -529,23 +583,27 @@ class ArithmeticQuizApp(ctk.CTk):
         operator = random.choice(operators)
         
         if self.difficulty["name"] == "Easy":
+            # no negative answers in easy mode
             if operator == "-":
-                # avoid negative answers for easy mode
                 num2 = random.randint(num_range[0], num_range[1])
-                num1 = random.randint(num2, num_range[1])
+                num1 = random.randint(num2, num_range[1])  # num1 will always be >= num2
+            elif operator == "/":
+                num2 = random.randint(1, num_range[1])
+                multiplier = random.randint(1, num_range[1] // num2)
+                num1 = num2 * multiplier  # ensures whole number division
             else:
                 num1 = random.randint(num_range[0], num_range[1])
                 num2 = random.randint(num_range[0], num_range[1])
-
-        if operator == "/":
-            # whole numbers only for division
-            num2 = random.randint(1, num_range[1])
-            multiplier = random.randint(1, num_range[1] // num2)
-            num1 = num2 * multiplier
         else:
-            num1 = random.randint(num_range[0], num_range[1])
-            num2 = random.randint(num_range[0], num_range[1])
-
+            # other difficulties
+            if operator == "/":
+                num2 = random.randint(1, num_range[1])
+                multiplier = random.randint(1, num_range[1] // num2)
+                num1 = num2 * multiplier
+            else:
+                num1 = random.randint(num_range[0], num_range[1])
+                num2 = random.randint(num_range[0], num_range[1])
+    
         return {
             "num1": num1,
             "num2": num2,
@@ -572,9 +630,13 @@ class ArithmeticQuizApp(ctk.CTk):
             if correct:
                 self.score += 1
                 self.current_streak += 1
+                self.result_label.configure(text="Correct!", text_color="green")
             else:
                 self.current_streak = 0
-                self.show_error_message(f"Incorrect! The correct answer was {self.question['answer']}")
+                self.result_label.configure(
+                    text=f"Incorrect! The correct answer was {self.question['answer']}", 
+                    text_color="red"
+                )
 
             self.show_result(correct)
             
@@ -599,6 +661,8 @@ class ArithmeticQuizApp(ctk.CTk):
                 text=f"{self.question['num1']} {self.question['operator']} {self.question['num2']} = ?"
             )
             self.status_label.configure(text=self.get_status_text())
+            # clear result label when showing next question
+            self.after(1000, lambda: self.result_label.configure(text=""))
 
     def should_end_quiz(self):
         if self.game_mode == "timed":
@@ -618,11 +682,21 @@ class ArithmeticQuizApp(ctk.CTk):
             return f"Current streak: {self.current_streak}/{self.streak_length}"
 
     def update_timer(self):
+        """Update the timer display and schedule next update"""
         if self.game_mode == "timed" and not self.should_end_quiz():
             self.status_label.configure(text=self.get_status_text())
-            self.after(1000, self.update_timer)
+            # Store the timer ID
+            self.timer_id = self.after(1000, self.update_timer)
+
+    def cancel_timer(self):
+        """Cancel any existing timer callback"""
+        if self.timer_id is not None:
+            self.after_cancel(self.timer_id)
+            self.timer_id = None
 
     def show_end_screen(self):
+        # Cancel timer when quiz ends
+        self.cancel_timer()
         for widget in self.winfo_children():
             widget.destroy()
 
@@ -694,6 +768,8 @@ class ArithmeticQuizApp(ctk.CTk):
         quit_window = ctk.CTkToplevel(self)
         quit_window.title("Quit?")
         quit_window.geometry("300x150")
+        quit_window.transient(self)  # display on top
+        quit_window.lift()
         
         label = ctk.CTkLabel(
             quit_window,
@@ -724,21 +800,40 @@ class ArithmeticQuizApp(ctk.CTk):
 
     def show_error_message(self, message):
         """Show error message in a popup"""
-        error_window = ctk.CTkToplevel(self)
-        error_window.title("Error")
-        error_window.geometry("400x150")
+        # update message if window exists alreaady
+        if hasattr(self, 'error_window') and self.error_window is not None:
+            try:
+                # update error window status
+                self.error_window.lift()
+                for widget in self.error_window.winfo_children():
+                    if isinstance(widget, ctk.CTkLabel):
+                        widget.configure(text=message)
+                return
+            except ctk.TclError:  # window close
+                self.error_window = None
+        
+        # create new error window
+        self.error_window = ctk.CTkToplevel(self)
+        self.error_window.title("Error")
+        self.error_window.geometry("400x150")
+        self.error_window.transient(self)
+        self.error_window.lift()
         
         label = ctk.CTkLabel(
-            error_window,
+            self.error_window,
             text=message,
             font=("Arial", 16)
         )
         label.pack(pady=20)
         
+        def close_error():
+            self.error_window.destroy()
+            self.error_window = None
+        
         ctk.CTkButton(
-            error_window,
+            self.error_window,
             text="OK",
-            command=error_window.destroy
+            command=close_error
         ).pack(pady=10)
 
 # start the app
