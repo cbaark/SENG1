@@ -3,18 +3,9 @@ import time
 import customtkinter as ctk
 
 # TODO:
-# confirmation dialog for quitting
-# progress bar for fixed mode
-# custom icons for modes
-# color code correct/incorrect answers
 # practice mode/infinite mode where users can practice without any conditions
-# support for numpad
-# optimise question generation how though???
-# sound effects for correct/incorrect answers???
 # tooltips for what easy, medium, hard mode means and text underneath telling users to hover over the buttons to see what it means???
-# perfect score celebration screen???
 # light mode option?? high contrast option??
-# settings page for customisation of stuff said above
 
 # VENI VIDI VICI
 
@@ -130,8 +121,8 @@ class ArithmeticQuizApp(ctk.CTk):
         
         Difficulty Levels:
         • Easy: Addition and subtraction (1-10)
-        • Medium: Add multiplication (1-15)
-        • Hard: Add division (1-20)
+        • Medium: Addition, subtraction and multiplication (1-10)
+        • Hard: All operators (1-12)
         • Custom: Create your own settings
         
         Keyboard Shortcuts:
@@ -239,7 +230,7 @@ class ArithmeticQuizApp(ctk.CTk):
             command=lambda: self.set_difficulty({
                 "name": "Medium",
                 "operators": ["+", "-", "*"],
-                "range": [1, 15]
+                "range": [1, 10]
             })
         )
         medium_button.pack(pady=10)
@@ -250,7 +241,7 @@ class ArithmeticQuizApp(ctk.CTk):
             command=lambda: self.set_difficulty({
                 "name": "Hard",
                 "operators": ["+", "-", "*", "/"],
-                "range": [1, 20]
+                "range": [1, 12]
             })
         )
         hard_button.pack(pady=10)
@@ -510,7 +501,7 @@ class ArithmeticQuizApp(ctk.CTk):
         self.cancel_timer()
         for widget in self.winfo_children():
             widget.destroy()
-
+       
         # top frame
         status_frame = ctk.CTkFrame(self)
         status_frame.pack(fill='x', padx=20, pady=10)
@@ -528,6 +519,16 @@ class ArithmeticQuizApp(ctk.CTk):
             font=("Arial", 14)
         )
         self.score_label.pack(side='right', padx=10)
+
+        # Progress bar for fixed mode
+        if self.game_mode == "fixed":
+            self.progress_bar = ctk.CTkProgressBar(
+                status_frame,
+                width=200,
+                mode='determinate'
+            )
+            self.progress_bar.pack(side='right', padx=20)
+            self.progress_bar.set(0)  # Start at 0%
 
         # middle frame
         question_frame = ctk.CTkFrame(self)
@@ -647,6 +648,10 @@ class ArithmeticQuizApp(ctk.CTk):
     def show_result(self, correct):
         # clear answer_entry
         self.answer_entry.delete(0, 'end')
+
+        if self.game_mode == "fixed":
+            progress = self.questions_attempted / self.question_amount
+            self.progress_bar.set(progress)
         
         # update score
         self.score_label.configure(text=f"Score: {self.score}/{self.questions_attempted}")
@@ -770,6 +775,26 @@ class ArithmeticQuizApp(ctk.CTk):
         quit_window.geometry("300x150")
         quit_window.transient(self)  # display on top
         quit_window.lift()
+        
+        # Disable interaction with main window while dialog is open
+        quit_window.grab_set()
+        
+        # Center the window relative to main window
+        quit_window.withdraw()
+        
+        main_x = self.winfo_x()
+        main_y = self.winfo_y()
+        main_width = self.winfo_width()
+        main_height = self.winfo_height()
+        
+        dialog_width = 300
+        dialog_height = 150
+        
+        x = main_x + (main_width - dialog_width) // 2
+        y = main_y + (main_height - dialog_height) // 2
+        
+        quit_window.geometry(f"+{x}+{y}")
+        quit_window.deiconify()  # Show window at calculated position
         
         label = ctk.CTkLabel(
             quit_window,
