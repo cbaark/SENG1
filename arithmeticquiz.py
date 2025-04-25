@@ -2,7 +2,6 @@ import random
 import time
 import customtkinter as ctk
 
-# TODO:
 # practice mode/infinite mode where users can practice without any conditions
 # tooltips for what easy, medium, hard mode means and text underneath telling users to hover over the buttons to see what it means???
 # light mode option?? high contrast option??
