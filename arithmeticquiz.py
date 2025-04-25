@@ -2,12 +2,6 @@ import random
 import time
 import customtkinter as ctk
 
-# practice mode/infinite mode where users can practice without any conditions
-# tooltips for what easy, medium, hard mode means and text underneath telling users to hover over the buttons to see what it means???
-# light mode option?? high contrast option??
-
-# VENI VIDI VICI
-
 class ArithmeticQuizApp(ctk.CTk):
     def __init__(self):
         super().__init__()  # initialise the parent CTk class
@@ -17,6 +11,7 @@ class ArithmeticQuizApp(ctk.CTk):
         # dark mode, dark blue theme for the app 
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("dark-blue")
+        self.current_theme = "dark" 
 
         # setting variables
         self.game_mode = None
@@ -88,7 +83,11 @@ class ArithmeticQuizApp(ctk.CTk):
             text='Start Quiz',
             command=self.show_difficulty_selection
         ).pack(pady=20)
-
+        
+        # space buttons out
+        spacer = ctk.CTkLabel(self, text="")
+        spacer.pack(pady=20)
+        
         # add help button
         help_button = ctk.CTkButton(
             self,
@@ -96,6 +95,14 @@ class ArithmeticQuizApp(ctk.CTk):
             command=self.show_help_page
         )
         help_button.pack(pady=10)
+
+        # Add theme toggle button
+        theme_button = ctk.CTkButton(
+            self,
+            text="Toggle Light/Dark Mode",
+            command=self.toggle_theme
+        )
+        theme_button.pack(pady=10)
 
     def show_help_page(self):
         """Show help and instructions page"""
@@ -185,6 +192,15 @@ class ArithmeticQuizApp(ctk.CTk):
             command=self.go_back
         )
         back_button.pack(pady=10)
+
+    def toggle_theme(self):
+        """Toggle between light and dark mode"""
+        if self.current_theme == "dark":
+            ctk.set_appearance_mode("light")
+            self.current_theme = "light"
+        else:
+            ctk.set_appearance_mode("dark")
+            self.current_theme = "dark"
 
     def set_game_mode(self, mode):
         self.game_mode = mode
