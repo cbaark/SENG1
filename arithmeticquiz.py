@@ -39,11 +39,11 @@ class ArithmeticQuizApp(ctk.CTk):
     # HISTORY NAVIGATION
 
     def push_to_history(self, current_page):
-        """Add current page to navigation history"""
+        # Add current page to navigation history
         self.nav_history.append(current_page)
 
     def go_back(self):
-        """Navigate to previous page"""
+        # Navigate to previous page
         if len(self.nav_history) > 1:
             self.nav_history.pop()  # remove page
             previous_page = self.nav_history[-1]  # call prev page
@@ -185,6 +185,10 @@ class ArithmeticQuizApp(ctk.CTk):
             command=lambda: self.set_game_mode("streak")
         ).pack(pady=10)
 
+        # space buttons out
+        spacer = ctk.CTkLabel(self, text="")
+        spacer.pack(pady=20)
+
         # Add back button
         back_button = ctk.CTkButton(
             self,
@@ -268,6 +272,10 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         custom_button.pack(pady=10)
 
+        # space buttons out
+        spacer = ctk.CTkLabel(self, text="")
+        spacer.pack(pady=20)
+
         # Add back button
         back_button = ctk.CTkButton(
             self,
@@ -339,6 +347,10 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         submit_button.pack(pady=20)
 
+        # space buttons out
+        spacer = ctk.CTkLabel(self, text="")
+        spacer.pack(pady=20)
+
         # Add back button below submit button
         back_button = ctk.CTkButton(
             self,
@@ -369,6 +381,10 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         submit_button.pack(pady=20)
 
+        # space buttons out
+        spacer = ctk.CTkLabel(self, text="")
+        spacer.pack(pady=20)
+
         # Add back button
         back_button = ctk.CTkButton(
             self,
@@ -398,6 +414,10 @@ class ArithmeticQuizApp(ctk.CTk):
             command=self.process_question_amount
         )
         submit_button.pack(pady=20)
+
+        # space buttons out
+        spacer = ctk.CTkLabel(self, text="")
+        spacer.pack(pady=20)
 
         # Add back button
         back_button = ctk.CTkButton(
