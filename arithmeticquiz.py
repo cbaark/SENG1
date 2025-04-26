@@ -860,24 +860,38 @@ class ArithmeticQuizApp(ctk.CTk):
 
     def show_error_message(self, message):
         """Show error message in a popup"""
-        # update message if window exists alreaady
+        # If error window already exists, destroy it first
         if hasattr(self, 'error_window') and self.error_window is not None:
             try:
-                # update error window status
-                self.error_window.lift()
-                for widget in self.error_window.winfo_children():
-                    if isinstance(widget, ctk.CTkLabel):
-                        widget.configure(text=message)
-                return
-            except ctk.TclError:  # window close
-                self.error_window = None
+                self.error_window.destroy()
+            except:
+                pass
         
-        # create new error window
+        # Create new error window
         self.error_window = ctk.CTkToplevel(self)
         self.error_window.title("Error")
         self.error_window.geometry("400x150")
         self.error_window.transient(self)
         self.error_window.lift()
+        
+        # Disable interaction with main window while error is shown
+        self.error_window.grab_set()
+        
+        # Center the error window relative to main window
+        self.error_window.withdraw()
+        main_x = self.winfo_x()
+        main_y = self.winfo_y()
+        main_width = self.winfo_width()
+        main_height = self.winfo_height()
+        
+        dialog_width = 400
+        dialog_height = 150
+        
+        x = main_x + (main_width - dialog_width) // 2
+        y = main_y + (main_height - dialog_height) // 2
+        
+        self.error_window.geometry(f"+{x}+{y}")
+        self.error_window.deiconify()
         
         label = ctk.CTkLabel(
             self.error_window,
@@ -886,14 +900,10 @@ class ArithmeticQuizApp(ctk.CTk):
         )
         label.pack(pady=20)
         
-        def close_error():
-            self.error_window.destroy()
-            self.error_window = None
-        
         ctk.CTkButton(
             self.error_window,
             text="OK",
-            command=close_error
+            command=self.error_window.destroy
         ).pack(pady=10)
 
 # start the app
