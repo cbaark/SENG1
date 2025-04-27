@@ -1,2 +1,1 @@
-# SENG1
-software engineering yr11 term1/2
+Download link (.zip): https://github.com/cbaark/SENG1/archive/refs/heads/main.zip
