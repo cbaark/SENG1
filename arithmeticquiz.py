@@ -54,8 +54,10 @@ class ArithmeticQuizApp(ctk.CTk):
             self.show_welcome_page()
         elif previous_page == "mode":
             self.show_mode_selection()
+            self.game_mode = None # reset game mode when user goes back
         elif previous_page == "difficulty":
             self.show_difficulty_selection()
+            self.difficulty = None # reset difficulty when user goes back
         elif previous_page == "custom":
             self.show_custom_difficulty()
         elif previous_page == "time":
@@ -105,7 +107,7 @@ class ArithmeticQuizApp(ctk.CTk):
         theme_button.pack(pady=10)
 
     def show_help_page(self):
-        """Show help and instructions page"""
+        #Show help and instructions page#
         self.geometry('600x700')
         for widget in self.winfo_children():
             widget.destroy()
@@ -198,7 +200,7 @@ class ArithmeticQuizApp(ctk.CTk):
         back_button.pack(pady=10)
 
     def toggle_theme(self):
-        """Toggle between light and dark mode"""
+        # Toggle between light and dark mode
         if self.current_theme == "dark":
             ctk.set_appearance_mode("light")
             self.current_theme = "light"
@@ -722,14 +724,14 @@ class ArithmeticQuizApp(ctk.CTk):
             return f"Current streak: {self.current_streak}/{self.streak_length}"
 
     def update_timer(self):
-        """Update the timer display and schedule next update"""
+        # Update the timer display and schedule next update
         if self.game_mode == "timed" and not self.should_end_quiz():
             self.status_label.configure(text=self.get_status_text())
             # Store the timer ID
             self.timer_id = self.after(1000, self.update_timer)
 
     def cancel_timer(self):
-        """Cancel any existing timer callback"""
+        # Cancel any existing timer callback
         if self.timer_id is not None:
             self.after_cancel(self.timer_id)
             self.timer_id = None
@@ -804,7 +806,7 @@ class ArithmeticQuizApp(ctk.CTk):
         main_menu_button.pack(side='left', padx=10)
 
     def show_quit_dialog(self):
-        """Show confirmation dialog when quitting"""
+        # Show confirmation dialog when quitting
         quit_window = ctk.CTkToplevel(self)
         quit_window.title("Quit?")
         quit_window.geometry("300x150")
@@ -854,13 +856,13 @@ class ArithmeticQuizApp(ctk.CTk):
         ).pack(side='left', padx=10)
 
     def handle_return_key(self):
-        """Handle Return key press based on current screen"""
+        # Handle Return key press based on current screen
         if hasattr(self, 'answer_entry') and self.answer_entry.winfo_viewable():
             self.check_answer()
 
     def show_error_message(self, message):
-        """Show error message in a popup"""
-        # If error window already exists, destroy it first
+        # Show error message in a popup
+        # if error window already exists, destroy it first
         if hasattr(self, 'error_window') and self.error_window is not None:
             try:
                 self.error_window.destroy()
