@@ -1,6 +1,7 @@
 import random
 import time
 import customtkinter as ctk
+from PIL import Image, ImageTk
 
 class ArithmeticQuizApp(ctk.CTk):
     def __init__(self):
@@ -107,8 +108,8 @@ class ArithmeticQuizApp(ctk.CTk):
         theme_button.pack(pady=10)
 
     def show_help_page(self):
-        #Show help and instructions page#
-        self.geometry('600x700')
+        #Show help and instructions page
+        self.geometry('600x600')
         for widget in self.winfo_children():
             widget.destroy()
             
